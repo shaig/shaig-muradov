@@ -1,0 +1,306 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+const recentPosts = posts
+  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
+  .slice(0, 3);
+---
+
+<Layout title="Shaig Muradov" description="Web Developer & Product Owner">
+  <main>
+    <div class="container">
+
+      <!-- Profile -->
+      <section class="profile">
+        <img
+          src="https://pbs.twimg.com/profile_images/2034368056810717184/Ep-5LbJU_400x400.jpg"
+          alt="Shaig Muradov"
+          class="avatar"
+        />
+        <h1>Shaig Muradov</h1>
+        <p class="role">Web Developer / Product Owner</p>
+        <p class="bio">
+          WordPress developer and experienced Product Manager. Participated in 200+ projects
+          from 7 countries including Azerbaijan, Turkey, USA, UAE. Worked with brands like
+          P&amp;G, Hyundai, Coca-Cola, SOCAR.
+        </p>
+
+        <div class="social">
+          <a href="https://www.linkedin.com/in/shaigmuradov/" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+          <a href="https://github.com/shaig" aria-label="GitHub" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://x.com/shaig_m" aria-label="X" target="_blank" rel="noopener">
+            <i class="fa-solid fa-x"></i>
+          </a>
+          <a href="https://www.instagram.com/shaig_m/" aria-label="Instagram" target="_blank" rel="noopener">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://www.tiktok.com/@shaig_m" aria-label="TikTok" target="_blank" rel="noopener">
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+          <a href="https://shaig.substack.com" aria-label="Substack" target="_blank" rel="noopener">
+            <i class="fa-solid fa-newspaper"></i>
+          </a>
+        </div>
+
+        <a href="mailto:shaig@muradov.org?subject=Contact from site!" class="btn">
+          Message
+        </a>
+      </section>
+
+      <!-- Substack Widget -->
+      <section class="card">
+        <div class="card-header">
+          <i class="fa-solid fa-newspaper"></i>
+          <h2>From Substack</h2>
+          <a href="https://shaig.substack.com" target="_blank" rel="noopener" class="see-all">
+            See all <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+        <ul id="substack-posts" class="post-list">
+          <li class="loading">Loading...</li>
+        </ul>
+      </section>
+
+      <!-- Blog -->
+      {recentPosts.length > 0 && (
+        <section class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-pen-nib"></i>
+            <h2>Blog</h2>
+            <a href="/blog" class="see-all">
+              See all <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <ul class="post-list">
+            {recentPosts.map(post => (
+              <li>
+                <a href={`/blog/${post.id}`}>{post.data.title}</a>
+                <span class="date">
+                  {new Date(post.data.publishDate).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  async function loadSubstackPosts() {
+    const el = document.getElementById('substack-posts');
+    if (!el) return;
+
+    try {
+      const res = await fetch('/api/posts');
+      const posts = await res.json();
+
+      if (!Array.isArray(posts) || !posts.length) {
+        el.innerHTML = '<li class="empty">No posts found.</li>';
+        return;
+      }
+
+      el.innerHTML = posts
+        .map((post: { title: string; link: string; pubDate: string }) => {
+          const date = post.pubDate
+            ? new Date(post.pubDate).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+              })
+            : '';
+          return `<li>
+            <a href="${post.link}" target="_blank" rel="noopener">${post.title}</a>
+            ${date ? `<span class="date">${date}</span>` : ''}
+          </li>`;
+        })
+        .join('');
+    } catch {
+      el.innerHTML = '<li class="empty">Could not load posts.</li>';
+    }
+  }
+
+  loadSubstackPosts();
+</script>
+
+<style>
+  main {
+    padding: 3rem 1rem;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .profile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    object-fit: cover;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .role {
+    font-size: 0.875rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .bio {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    max-width: 440px;
+    line-height: 1.7;
+  }
+
+  .social {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .social a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.6rem 2rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: opacity 0.2s;
+    margin-top: 0.25rem;
+  }
+
+  .btn:hover {
+    opacity: 0.75;
+    color: #ffffff;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-header i {
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .card-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .see-all {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .see-all:hover {
+    color: var(--accent);
+  }
+
+  .post-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .post-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-list li:last-child {
+    border-bottom: none;
+  }
+
+  .post-list a {
+    font-size: 0.9rem;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .post-list a:hover {
+    color: var(--accent);
+  }
+
+  .date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .loading, .empty {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    padding: 0.5rem 0;
+  }
+</style>

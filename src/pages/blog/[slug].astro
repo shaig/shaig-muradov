@@ -1,0 +1,148 @@
+---
+export const prerender = true;
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import Markdoc from '@markdoc/markdoc';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const ast = Markdoc.parse(post.body ?? '');
+const content = Markdoc.transform(ast);
+const html = Markdoc.renderers.html(content);
+---
+
+<Layout title={`${post.data.title} — Shaig Muradov`} description={post.data.description}>
+  <main>
+    <div class="container">
+      <a href="/blog" class="back"><i class="fa-solid fa-arrow-left"></i> All posts</a>
+
+      <article>
+        <header>
+          <h1>{post.data.title}</h1>
+          <time>
+            {new Date(post.data.publishDate).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            })}
+          </time>
+          {post.data.description && <p class="desc">{post.data.description}</p>}
+        </header>
+
+        <div class="content" set:html={html} />
+      </article>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 3rem 1rem;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .back {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .desc {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .content {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .content :global(h2) {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .content :global(h3) {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .content :global(p) {
+    margin-bottom: 1.2rem;
+  }
+
+  .content :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .content :global(code) {
+    background: var(--surface-2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.875em;
+  }
+
+  .content :global(pre) {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin-bottom: 1.2rem;
+  }
+
+  .content :global(ul), .content :global(ol) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .content :global(li) {
+    margin-bottom: 0.3rem;
+  }
+
+  .content :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+  }
+</style>
