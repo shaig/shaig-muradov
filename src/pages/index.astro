@@ -112,15 +112,17 @@ const recentPosts = posts
       }
 
       el.innerHTML = posts
-        .map((post: { title: string; link: string; pubDate: string }) => {
+        .map((post: { title: string; link: string; pubDate: string; description: string }) => {
           const date = post.pubDate
             ? new Date(post.pubDate).toLocaleDateString('en-US', {
                 year: 'numeric', month: 'short', day: 'numeric',
               })
             : '';
-          return `<li>
-            <a href="${post.link}" target="_blank" rel="noopener">${post.title}</a>
-            ${date ? `<span class="date">${date}</span>` : ''}
+          return `<li class="substack-item">
+            <div class="substack-header">
+              <a class="substack-title" href="${post.link}" target="_blank" rel="noopener">${post.title}</a>${date ? ` <span class="substack-date">(${date})</span>` : ''}
+            </div>
+            ${post.description ? `<p class="substack-desc">${post.description}</p>` : ''}
           </li>`;
         })
         .join('');
@@ -302,5 +304,48 @@ const recentPosts = posts
     font-size: 0.875rem;
     color: var(--text-muted);
     padding: 0.5rem 0;
+  }
+
+  :global(.substack-item) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  :global(.substack-item:last-child) {
+    border-bottom: none;
+  }
+
+  :global(.substack-header) {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  :global(.substack-title) {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  :global(.substack-title:hover) {
+    color: var(--accent);
+  }
+
+  :global(.substack-date) {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  :global(.substack-desc) {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
   }
 </style>

@@ -28,7 +28,13 @@ export const GET: APIRoute = async () => {
         item.match(/<pubDate>(.*?)<\/pubDate>/s)?.[1]?.trim() ??
         '';
 
-      return { title, link, pubDate };
+      const rawDesc =
+        item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)?.[1]?.trim() ??
+        item.match(/<description>([\s\S]*?)<\/description>/)?.[1]?.trim() ??
+        '';
+      const description = rawDesc.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 160);
+
+      return { title, link, pubDate, description };
     });
 
     return new Response(JSON.stringify(posts), {
