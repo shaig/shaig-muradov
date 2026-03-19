@@ -2,7 +2,7 @@
 	"name": "shaig-muradov",
 	"main": "dist/_worker.js",
 	"compatibility_date": "2026-03-17",
-	"compatibility_flags": ["global_fetch_strictly_public"],
+	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"directory": "./dist",
 		"binding": "ASSETS"
