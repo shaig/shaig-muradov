@@ -4,7 +4,9 @@ import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export default defineConfig({
   adapter: cloudflare({ imageService: 'compile' }),
-  integrations: [react(), keystatic()]
+  integrations: isDev ? [react(), keystatic()] : [react()]
 });
